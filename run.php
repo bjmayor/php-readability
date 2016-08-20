@@ -15,9 +15,9 @@ require 'lib/class-IXR.php';
 require 'lib/plugin.php';
 require 'lib/xmlrpc.inc';
 $base_url = 'http://www.meiwendays.com/abc';
-$begin = 400;
+$begin = 3011;
 #$last = 1076;
-$last = 600;
+$last = 3052;
 for ($i=$begin;$i<$last;$i++)
 {
     $request_url = $base_url . $i;
@@ -26,16 +26,16 @@ for ($i=$begin;$i<$last;$i++)
         if($ret['title']!='' && $ret['content']!='')
         {
             var_dump($ret);
-            $xmlrpcurl='http://xiexiefa.com/xmlrpc.php';
+            $xmlrpcurl='http://go2live.cn/xmlrpc.php';
            
             $blogid='1';
-            $username='xiaoqiao';
-            $password='&@rxhAmeulk#KGVsut';
+            $username='bjmayor';
+            $password='blog951096';
             $postTitle=$ret['title'];
             $postContent=$ret['content'];
 
             //$GLOBALS['xmlrpc_internalencoding'] = 'UTF-8';
-            define ('DOMAIN', 'topfrom.com'); // 博客的域名 
+            define ('DOMAIN', 'go2live.cn'); // 博客的域名 
             // 创建 xml-rpc client 
             $cl = new xmlrpc_client ( "/xmlrpc.php", DOMAIN, 80); 
             // 准备请求 
@@ -48,7 +48,8 @@ for ($i=$begin;$i<$last;$i++)
                 array ( "title" => new xmlrpcval ( $postTitle, 'string' ), // 标题 
                         "description" => new xmlrpcval ($postContent , 'string'), // 内容
                         "post_type"=>new xmlrpcval("post",'string'),
-                        "post_status"=>new xmlrpcval("publish",'string')
+                        "post_status"=>new xmlrpcval("publish",'string'),
+                        "category"=>new xmlrpcval(array(new xmlrpcval("美文赏析",'string')),'array')
                     ),
                     "struct" );
             $req->addParam ( $struct ); 

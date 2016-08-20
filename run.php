@@ -15,9 +15,9 @@ require 'lib/class-IXR.php';
 require 'lib/plugin.php';
 require 'lib/xmlrpc.inc';
 $base_url = 'http://www.meiwendays.com/abc';
-$begin = 3011;
+$begin = 3052;
 #$last = 1076;
-$last = 3052;
+$last = 3062;
 for ($i=$begin;$i<$last;$i++)
 {
     $request_url = $base_url . $i;
@@ -26,57 +26,7 @@ for ($i=$begin;$i<$last;$i++)
         if($ret['title']!='' && $ret['content']!='')
         {
             var_dump($ret);
-            $xmlrpcurl='http://go2live.cn/xmlrpc.php';
-           
-            $blogid='1';
-            $username='bjmayor';
-            $password='blog951096';
-            $postTitle=$ret['title'];
-            $postContent=$ret['content'];
-
-            //$GLOBALS['xmlrpc_internalencoding'] = 'UTF-8';
-            define ('DOMAIN', 'go2live.cn'); // 博客的域名 
-            // 创建 xml-rpc client 
-            $cl = new xmlrpc_client ( "/xmlrpc.php", DOMAIN, 80); 
-            // 准备请求 
-            $req = new xmlrpcmsg('metaWeblog.newPost'); 
-            // 逐个列出请求的参数: 
-            $req->addParam ( new xmlrpcval ( 1, 'int')); // 博客ID 
-            $req->addParam ( new xmlrpcval ( $username, 'string' )); // 用户名 
-            $req->addParam ( new xmlrpcval ( $password, 'string' )); // 密码 
-            $struct = new xmlrpcval (
-                array ( "title" => new xmlrpcval ( $postTitle, 'string' ), // 标题 
-                        "description" => new xmlrpcval ($postContent , 'string'), // 内容
-                        "post_type"=>new xmlrpcval("post",'string'),
-                        "post_status"=>new xmlrpcval("publish",'string'),
-                        "category"=>new xmlrpcval(array(new xmlrpcval("美文赏析",'string')),'array')
-                    ),
-                    "struct" );
-            $req->addParam ( $struct ); 
-//            $req->addParam ( new xmlrpcval (1, 'int')); // 立即发布
-            // 发送请求 
-            $ans = $cl->send($req); 
-            var_dump ( $ans );
-/*
-            $client = new IXR_Client($xmlrpcurl);
-            $params=array(
-                '',
-                'blog_ID'=>$blogid,
-                'user_login'=>$username,
-                'user_pass'=>$password,
-                'post_content'=>$postTitle . $postContent,
-                'blog_title'=>$postTitle,
-                'publish'=>true
-            );
-            $params=array_values($params);
-            $client->query("blogger.newPost",$params);
-            $response=$client->getResponse();
-            if ($response['faultCode']==0){
-                print 'Success';
-            } else {
-                print 'Fail:' . $response['faultString'];
-            }
- */
+            postWp($ret['title'],$ret['content']);
         }
 
     }
@@ -147,12 +97,47 @@ function get_content($request_url)
 
     case 'html': default:
         header("Content-type: text/html;charset=utf-8");
-
         $title   = $Data['title'];
         $content = $Data['content'];
 
         return array("title"=>$title,"content"=>$content);
         //        include 'template/reader.html';
     }
+}
+
+function postWp($title, $content, $categories, $pubDate)
+{
+    $xmlrpcurl='http://go2live.cn/xmlrpc.php';
+
+    $blogid='1';
+    $username='bjmayor';
+    $password='blog951096';
+    $postTitle=$title;
+    $postContent=$content;
+
+    //$GLOBALS['xmlrpc_internalencoding'] = 'UTF-8';
+    define ('DOMAIN', 'go2live.cn'); // 博客的域名 
+    // 创建 xml-rpc client 
+    $cl = new xmlrpc_client ( "/xmlrpc.php", DOMAIN, 80); 
+    // 准备请求 
+    $req = new xmlrpcmsg('metaWeblog.newPost'); 
+    // 逐个列出请求的参数: 
+    $req->addParam ( new xmlrpcval ( 1, 'int')); // 博客ID 
+    $req->addParam ( new xmlrpcval ( $username, 'string' )); // 用户名 
+    $req->addParam ( new xmlrpcval ( $password, 'string' )); // 密码 
+    $struct = new xmlrpcval (
+        array ( "title" => new xmlrpcval ( $postTitle, 'string' ), // 标题 
+        "description" => new xmlrpcval ($postContent , 'string'), // 内容
+        "post_type"=>new xmlrpcval("post",'string'),
+        "post_status"=>new xmlrpcval("publish",'string'),
+        "categories"=>new xmlrpcval(array(new xmlrpcval("美文赏析","string")),"array")//分类信息,分类信息是需要已经存在的分类。
+    ),
+    "struct" );
+    $req->addParam ( $struct ); 
+    $req->addParam ( new xmlrpcval (1, 'int')); // 立即发布
+    // 发送请求 
+    $ans = $cl->send($req); 
+    var_dump ( $ans );
+
 }
 

@@ -15,56 +15,46 @@ require 'lib/class-IXR.php';
 require 'lib/plugin.php';
 require 'lib/xmlrpc.inc';
 require 'record.php';
-$base_url = 'http://www.meiwendays.com/abc';
-if(($pageid=getValue($base_url)) == NULL)
+
+main();
+function main()
 {
-    $pageid= 3260;
-    if(!addValue($base_url,$pageid))
-    {
-        die("addValue fail"); 
-    }
-}
-$pageid = (int)$pageid;
-while(true)
-{
-    $request_url = $base_url . $pageid;
-    echo "deal with url : $request_url \n";
-    try {
-        if(recordUrl($request_url))
-        {
+    $listpage = 'http://www.linuxidc.com/Linuxit/index.htm';
+    $listcontent = file_get_contents($listpage);
+    if(preg_match_all('~<a href=\"../Linux/([^"]*)" target="_blank" class="nLink">([^<]*)</a>~',$listcontent,$matches))
+            {
+            $j=0;
+            foreach($matches[0] as $page)
+            {
+            $page = $matches[1][$j];
+            $title = $matches[2][$j];
+            $j++;
+            $link = "http://www.linuxidc.com/Linux/$page";
+            $request_url = $link;
+            try {
+            if(!recordUrl($request_url))
+            {
+            echo "duplicated url\n";
+            continue;
+            }
             $ret = get_content($request_url);
+            $ret['title'] = $title;
             if($ret['title']!='' && $ret['content']!='')
             {
-                postWp($ret['title'],$ret['content']);
-                $pageid++;
+            postWp($ret['title'],$ret['content']);
+            sleep(1);
             }
-            else
+            }
+            catch(Exception $e)
             {
-                updateValue($base_url,$pageid);
-                die("not valid content");
+                echo "parse error";
             }
 
-        }
-        else
-        {
-            $pageid++;
-            echo "duplicated url\n";
-        }
 
-    }
-    catch(Exception $e)
-    {
-        if(!updateValue($base_url,$pageid))
-        { 
-            die("update fail");
-        }
-        else
-        {
-            die("can't parse");
-        }
-    }
-    sleep(1);
+            }
+            }
 }
+
 
 function get_content($request_url)
 {
@@ -118,7 +108,6 @@ function get_content($request_url)
      */
     $Readability = new Readability($source, $charset);
     $Data = $Readability->getContent();
-
     switch($output_type) {
         case 'json':
             header("Content-type: text/json;charset=utf-8");
@@ -127,11 +116,13 @@ function get_content($request_url)
             break;
 
         case 'html': default:
-            header("Content-type: text/html;charset=utf-8");
+            //header("Content-type: text/html;charset=utf-8");
             $title   = $Data['title'];
-            $content = $Data['content'];
+            $title = substr($title,0,strpos($title,"_Linux编程_Linux公社-Linux系统门户网站"));
+            $content = str_replace('src="../../','src="http://www.linuxidc.com/',$Data['content']);
+            $content = substr($content, 0,-290); 
 
-            return array("title"=>$title,"content"=>$content);
+            return array("title"=>$title,"content"=>$content."</div>");
             //        include 'template/reader.html';
     }
 }
@@ -172,8 +163,9 @@ function postWp($title, $content, $categories, $pubDate)
             array ( "title" => new xmlrpcval ( $postTitle, 'string' ), // 标题 
                 "description" => new xmlrpcval ($postContent , 'string'), // 内容
                 "post_type"=>new xmlrpcval("post",'string'),
-                "post_status"=>new xmlrpcval("publish",'string'),
-                "categories"=>new xmlrpcval(array(new xmlrpcval("美文赏析","string")),"array")//分类信息,分类信息是需要已经存在的分类。
+                "post_status"=>new xmlrpcval("post",'string'),//publish为发布,draft为草稿
+                "dateCreated"=>new xmlrpcval(mt_rand(strtotime("2008-8-5 00:00:00"),strtotime("2016-08-29 12:00:00")),"dateTime.iso8601"),//发布时间，可不填，默认为当前时间。
+                "categories"=>new xmlrpcval(array(new xmlrpcval("linux学习","string")),"array")//分类信息,分类信息是需要已经存在的分类。
                 ),
             "struct" );
     $req->addParam ( $struct ); 

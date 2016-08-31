@@ -15,56 +15,53 @@ require 'lib/class-IXR.php';
 require 'lib/plugin.php';
 require 'lib/xmlrpc.inc';
 require 'record.php';
-$base_url = 'http://www.meiwendays.com/abc';
-if(($pageid=getValue($base_url)) == NULL)
-{
-    $pageid= 3260;
-    if(!addValue($base_url,$pageid))
-    {
-        die("addValue fail"); 
-    }
-}
-$pageid = (int)$pageid;
-while(true)
-{
-    $request_url = $base_url . $pageid;
-    echo "deal with url : $request_url \n";
-    try {
-        if(recordUrl($request_url))
+$listpage= "http://tech.ifeng.com/listpage/803/1/list.shtml";
+$listcontent = file_get_contents($listpage);
+if(preg_match_all('~<span>(.*)</span> </div>\s*<h2><a class="[^"]*" href="([^"]*)"~',$listcontent,$matches)) {
+        $j=0;
+        foreach($matches[0] as $item)
         {
-            $ret = get_content($request_url);
-            if($ret['title']!='' && $ret['content']!='')
-            {
-                postWp($ret['title'],$ret['content']);
-                $pageid++;
-            }
-            else
-            {
-                updateValue($base_url,$pageid);
-                die("not valid content");
-            }
-
+        $date = $matches[1][$j];
+        $link= $matches[2][$j];
+        $j++;
+        if(recordUrl($link))
+        {
+        do_spider_to_wp($link,$date);
         }
         else
         {
-            $pageid++;
-            echo "duplicated url\n";
+        echo "duplicated url\n";
+        }
+        }
+        }
+        else
+        {
+        echo "list no match\n";
+        break;
+        }
+
+
+die("done");
+function do_spider_to_wp($url,$date)
+{
+    echo "do post url $url \n";
+    $request_url = $url;
+    try {
+        $ret = get_content($request_url);
+        if($ret['title']!='' && $ret['content']!='')
+        {
+            postWp($ret['title'],$ret['content'],"互联网观点热点",$date);
+            sleep(1);
         }
 
     }
     catch(Exception $e)
     {
-        if(!updateValue($base_url,$pageid))
-        { 
-            die("update fail");
-        }
-        else
-        {
-            die("can't parse");
-        }
+        echo "parse error";
     }
-    sleep(1);
+
 }
+
 
 function get_content($request_url)
 {
@@ -118,7 +115,6 @@ function get_content($request_url)
      */
     $Readability = new Readability($source, $charset);
     $Data = $Readability->getContent();
-
     switch($output_type) {
         case 'json':
             header("Content-type: text/json;charset=utf-8");
@@ -127,16 +123,19 @@ function get_content($request_url)
             break;
 
         case 'html': default:
-            header("Content-type: text/html;charset=utf-8");
+            //header("Content-type: text/html;charset=utf-8");
             $title   = $Data['title'];
             $content = $Data['content'];
+            $title = substr($title,0,strpos($title,"_凤凰科技"));
+            //        $content = str_replace('src="../../','src="http://www.linuxidc.com/',$Data['content']);
+            //       $content = substr($content, 0,-290); 
 
-            return array("title"=>$title,"content"=>$content);
+            return array("title"=>$title,"content"=>$content."<p>更多文章请点击<a href='http://go2live.cn'>http://go2live.cn</a></p>");
             //        include 'template/reader.html';
     }
 }
 
-function postWp($title, $content, $categories, $pubDate)
+function postWp($title, $content, $categorie, $pubDate)
 {
     $xmlrpcurl='http://go2live.cn/xmlrpc.php';
 
@@ -172,15 +171,16 @@ function postWp($title, $content, $categories, $pubDate)
             array ( "title" => new xmlrpcval ( $postTitle, 'string' ), // 标题 
                 "description" => new xmlrpcval ($postContent , 'string'), // 内容
                 "post_type"=>new xmlrpcval("post",'string'),
-                "post_status"=>new xmlrpcval("publish",'string'),
-                "categories"=>new xmlrpcval(array(new xmlrpcval("美文赏析","string")),"array")//分类信息,分类信息是需要已经存在的分类。
+                "post_status"=>new xmlrpcval("post",'string'),//publish为发布,draft为草稿
+                "dateCreated"=>new xmlrpcval(strtotime($pubDate),"dateTime.iso8601"),//发布时间，可不填，默认为当前时间。
+                "categories"=>new xmlrpcval(array(new xmlrpcval($categorie,"string")),"array")//分类信息,分类信息是需要已经存在的分类。
                 ),
             "struct" );
     $req->addParam ( $struct ); 
     $req->addParam ( new xmlrpcval (1, 'int')); // 立即发布
     // 发送请求 
     $ans = $cl->send($req); 
-    var_dump ( $ans );
+    //    var_dump ( $ans );
 
 }
 

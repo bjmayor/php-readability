@@ -15,17 +15,12 @@ require 'lib/class-IXR.php';
 require 'lib/plugin.php';
 require 'lib/xmlrpc.inc';
 require 'record.php';
+require 'postWp.php';
 $base_url = 'http://www.meiwendays.com/abc';
-if(($pageid=getValue($base_url)) == NULL)
-{
-    $pageid= 3260;
-    if(!addValue($base_url,$pageid))
-    {
-        die("addValue fail"); 
-    }
-}
-$pageid = (int)$pageid;
-while(true)
+//只能手工执行...
+$start= 3300;
+$end = 3319;
+for ($pageid=$start;$pageid<=$end;$pageid++)
 {
     $request_url = $base_url . $pageid;
     echo "deal with url : $request_url \n";
@@ -41,24 +36,12 @@ while(true)
             {
                 echo "duplicated url\n";
             }
-            $pageid++;
-        }
-        else
-        {
-            die("not valid content");
         }
 
     }
     catch(Exception $e)
     {
-        if(!updateValue($base_url,$pageid))
-        { 
-            die("update fail");
-        }
-        else
-        {
-            die("can't parse");
-        }
+        echo "parse error\n";
     }
     sleep(1);
 }
@@ -133,51 +116,4 @@ function get_content($request_url)
     }
 }
 
-function postWp($title, $content, $categories, $pubDate)
-{
-    $xmlrpcurl='http://go2live.cn/xmlrpc.php';
-
-    $blogid='1';
-    $users = array(
-        array("name"=>"bjmayor","password"=>"blog951096"),
-        array("name"=>"maynard","password"=>"wp123456"),
-        array("name"=>"fenny","password"=>"Nl!zceEiiBV!51GwzMYNdL6c"),
-        array("name"=>"stack","password"=>"Zfx0#0tX0cpIVotBfOoQ(yNr"),
-        array("name"=>"shine","password"=>'TkMfjwI)NCf$UN5)kxuSOa1b'),
-        array("name"=>"hellowo","password"=>"qO#rcv15I#xD5fHj(nHtj(1l"),
-        array("name"=>"peace","password"=>"7nWmvvvqGsl#CnL^opav&Ck2"),
-        array("name"=>"php","password"=>"EuwV!OVm%upmCEobPMBoTYIn"),
-    );
-    $user = $users[rand()%count($users)];
-    $username=$user['name'];
-    $password=$user['password'];
-
-    $postTitle=$title;
-    $postContent=$content;
-
-    //$GLOBALS['xmlrpc_internalencoding'] = 'UTF-8';
-    define ('DOMAIN', 'go2live.cn'); // 博客的域名 
-    // 创建 xml-rpc client 
-    $cl = new xmlrpc_client ( "/xmlrpc.php", DOMAIN, 80); 
-    // 准备请求 
-    $req = new xmlrpcmsg('metaWeblog.newPost'); 
-    // 逐个列出请求的参数: 
-    $req->addParam ( new xmlrpcval ( 1, 'int')); // 博客ID 
-    $req->addParam ( new xmlrpcval ( $username, 'string' )); // 用户名 
-    $req->addParam ( new xmlrpcval ( $password, 'string' )); // 密码 
-    $struct = new xmlrpcval (
-        array ( "title" => new xmlrpcval ( $postTitle, 'string' ), // 标题 
-        "description" => new xmlrpcval ($postContent , 'string'), // 内容
-        "post_type"=>new xmlrpcval("post",'string'),
-        "post_status"=>new xmlrpcval("publish",'string'),
-        "categories"=>new xmlrpcval(array(new xmlrpcval("美文赏析","string")),"array")//分类信息,分类信息是需要已经存在的分类。
-    ),
-    "struct" );
-    $req->addParam ( $struct ); 
-    $req->addParam ( new xmlrpcval (1, 'int')); // 立即发布
-    // 发送请求 
-    $ans = $cl->send($req); 
-    var_dump ( $ans );
-
-}
 

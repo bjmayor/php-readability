@@ -15,6 +15,7 @@ require 'lib/class-IXR.php';
 require 'lib/plugin.php';
 require 'lib/xmlrpc.inc';
 require 'record.php';
+require 'postWp.php';
 //每天8点自动运行
 $ret =  getSubscribed();
 foreach($ret['data'] as $item)
@@ -42,7 +43,7 @@ foreach($ret['data'] as $item)
     $wpContent .="</ul>";
     $wpContent .="<p>查看更多好文，请点击<a href=\"http://go2live.cn\">http://go2live.cn</a></p>";
     echo "do post url, topic $topicName \n";
-    postWp($wpTitle,$wpContent);
+    postWp($wpTitle,$wpContent,'杂文',date('Y-m-d H:i:s',time()));
 }
 
     /*
@@ -55,59 +56,6 @@ foreach($ret['data'] as $item)
 
 
 
-function postWp($title, $content, $categories, $pubDate)
-{
-
-    if (!$title || !$content)
-    {
-        echo "param errer";
-        var_dump(func_get_args());
-        die();
-    }
-    $xmlrpcurl='http://go2live.cn/xmlrpc.php';
-
-    $blogid='1';
-    $users = array(
-        array("name"=>"bjmayor","password"=>"blog951096"),
-        array("name"=>"maynard","password"=>"wp123456"),
-        array("name"=>"fenny","password"=>"Nl!zceEiiBV!51GwzMYNdL6c"),
-        array("name"=>"stack","password"=>"Zfx0#0tX0cpIVotBfOoQ(yNr"),
-        array("name"=>"shine","password"=>'TkMfjwI)NCf$UN5)kxuSOa1b'),
-        array("name"=>"hellowo","password"=>"qO#rcv15I#xD5fHj(nHtj(1l"),
-        array("name"=>"peace","password"=>"7nWmvvvqGsl#CnL^opav&Ck2"),
-        array("name"=>"php","password"=>"EuwV!OVm%upmCEobPMBoTYIn"),
-    );
-    $user = $users[rand()%count($users)];
-    $username=$user['name'];
-    $password=$user['password'];
-    $postTitle=$title;
-    $postContent=$content;
-
-    //$GLOBALS['xmlrpc_internalencoding'] = 'UTF-8';
-    define ('DOMAIN', 'go2live.cn'); // 博客的域名 
-    // 创建 xml-rpc client 
-    $cl = new xmlrpc_client ( "/xmlrpc.php", DOMAIN, 80); 
-    // 准备请求 
-    $req = new xmlrpcmsg('metaWeblog.newPost'); 
-    // 逐个列出请求的参数: 
-    $req->addParam ( new xmlrpcval ( 1, 'int')); // 博客ID 
-    $req->addParam ( new xmlrpcval ( $username, 'string' )); // 用户名 
-    $req->addParam ( new xmlrpcval ( $password, 'string' )); // 密码 
-    $struct = new xmlrpcval (
-        array ( "title" => new xmlrpcval ( $postTitle, 'string' ), // 标题 
-        "description" => new xmlrpcval ($postContent , 'string'), // 内容
-        "post_type"=>new xmlrpcval("post",'string'),
-        "post_status"=>new xmlrpcval("publish",'string'),
-        "categories"=>new xmlrpcval(array(new xmlrpcval("杂文","string")),"array")//分类信息,分类信息是需要已经存在的分类。
-    ),
-    "struct" );
-    $req->addParam ( $struct ); 
-    $req->addParam ( new xmlrpcval (1, 'int')); // 立即发布
-    // 发送请求 
-    $ans = $cl->send($req); 
-    var_dump ( $ans );
-
-}
 
 
 

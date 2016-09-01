@@ -21,7 +21,6 @@ require 'record.php';
 //{
 //   if ($i==1)
 //  {
-$listpage = 'http://www.linuxidc.com/RedLinux/index.htm';
 // }
 //else
 // {
@@ -31,34 +30,43 @@ $listpage = 'http://www.linuxidc.com/RedLinux/index.htm';
 main();
 function main()
 {
-    $listcontent = file_get_contents($listpage);
-    if(preg_match_all('~<a href=\"../Linux/([^"]*)" target="_blank" class="nLink">~',$listcontent,$matches)){
-            foreach($matches[1] as $page)
+    $max = 2720;
+    for($page = $max;$page>0;$page--)
+    {
+        $listpage = "http://www.woshipm.com/page/$page?nocache";
+        $listcontent = file_get_contents($listpage);
+        if(preg_match_all('~<h3 class="list-h3"><a target="_blank" href="([^"]*)" title="[^"]*">([^<]*)</a></h3>\s*</div>\s*<div class="down-box">\s*<li class="time">([^<]*)</li>~',$listcontent,$matches)){
+            for($i=0;$i<count($matches);$i++)
             {
-            $link = "http://www.linuxidc.com/Linux/$page";
-            $request_url = $link;
-            try {
-            if(!recordUrl($request_url))
-            {
-            continue;
-            }
-            $ret = get_content($request_url);
-            if($ret['title']!='' && $ret['content']!='')
-            {
-            //    var_dump($ret);
-            postWp($ret['title'],$ret['content']);
-            sleep(1);
-            }
+                $link = $matches[1][$i];
+                $title=$matches[2][$i];
+                $time = $matches[3][$i];
+                $request_url = $link;
+                try {
+                    if(!recordUrl($request_url))
+                    {
+                        continue;
+                    }
+
+                    $ret = get_content($request_url);
+                    $ret['title'] = $title;
+                    if($ret['title']!='' && $ret['content']!='')
+                    {
+                        $ret['content'].= "<p>互联网产品技术观点时事尽在演道网,点击查看更多<a href="\http://go2live.cn\">http://go2live.cn</a></p>";
+                        postWp($ret['title'],$ret['content'],"互联网产品设计",$time);
+                        sleep(1);
+                    }
+
+                }
+                catch(Exception $e)
+                {
+                    echo "parse error";
+                }
+
 
             }
-            catch(Exception $e)
-            {
-                echo "parse error";
-            }
-
-
-            }
-}
+        }
+    }
 }
 //}
 
@@ -71,38 +79,38 @@ function get_content($request_url)
 
     // 如果 URL 参数不正确，则跳转到首页
     if (!preg_match('/^http:\/\//i', $request_url) ||
-            !filter_var($request_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
-        include 'template/index.html';
-        exit;
-    }
+        !filter_var($request_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
+            include 'template/index.html';
+            exit;
+        }
 
     $request_url_hash = md5($request_url);
     $request_url_cache_file = sprintf(DIR_CACHE."/%s.url", $request_url_hash);
 
     // 缓存请求数据，避免重复请求
     if (file_exists($request_url_cache_file) && 
-            (time() - filemtime($request_url_cache_file) < CACHE_TIME)) {
+        (time() - filemtime($request_url_cache_file) < CACHE_TIME)) {
 
-        $source = file_get_contents($request_url_cache_file);
-    } else {
+            $source = file_get_contents($request_url_cache_file);
+        } else {
 
-        $handle = curl_init();
-        curl_setopt_array($handle, array(
-                    CURLOPT_USERAGENT => USER_AGENT,
-                    CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_HEADER  => false,
-                    CURLOPT_HTTPGET => true,
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_TIMEOUT => 30,
-                    CURLOPT_URL => $request_url
-                    ));
+            $handle = curl_init();
+            curl_setopt_array($handle, array(
+                CURLOPT_USERAGENT => USER_AGENT,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HEADER  => false,
+                CURLOPT_HTTPGET => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_URL => $request_url
+            ));
 
-        $source = curl_exec($handle);
-        curl_close($handle);
+            $source = curl_exec($handle);
+            curl_close($handle);
 
-        // Write request data into cache file.
-        @file_put_contents($request_url_cache_file, $source);
-    }
+            // Write request data into cache file.
+            @file_put_contents($request_url_cache_file, $source);
+        }
 
     // 判断编码
     //if (!$charset = mb_detect_encoding($source)) {
@@ -116,21 +124,21 @@ function get_content($request_url)
     $Readability = new Readability($source, $charset);
     $Data = $Readability->getContent();
     switch($output_type) {
-        case 'json':
-            header("Content-type: text/json;charset=utf-8");
-            $Data['url'] = $request_url;
-            echo json_encode($Data);
-            break;
+    case 'json':
+        header("Content-type: text/json;charset=utf-8");
+        $Data['url'] = $request_url;
+        echo json_encode($Data);
+        break;
 
-        case 'html': default:
-            //header("Content-type: text/html;charset=utf-8");
-            $title   = $Data['title'];
-            $title = substr($title,0,strpos($title,"_Linux编程_Linux公社-Linux系统门户网站"));
-            $content = str_replace('src="../../','src="http://www.linuxidc.com/',$Data['content']);
-            $content = substr($content, 0,-290); 
+    case 'html': default:
+        //header("Content-type: text/html;charset=utf-8");
+        $title   = $Data['title'];
+        $title = substr($title,0,strpos($title,"_Linux编程_Linux公社-Linux系统门户网站"));
+        $content = str_replace('src="../../','src="http://www.linuxidc.com/',$Data['content']);
+        $content = substr($content, 0,-290); 
 
-            return array("title"=>$title,"content"=>$content."</div>");
-            //        include 'template/reader.html';
+        return array("title"=>$title,"content"=>$content."</div>");
+        //        include 'template/reader.html';
     }
 }
 
@@ -140,15 +148,15 @@ function postWp($title, $content, $categories, $pubDate)
 
     $blogid='1';
     $users = array(
-            array("name"=>"bjmayor","password"=>"blog951096"),
-            array("name"=>"maynard","password"=>"wp123456"),
-            array("name"=>"fenny","password"=>"Nl!zceEiiBV!51GwzMYNdL6c"),
-            array("name"=>"stack","password"=>"Zfx0#0tX0cpIVotBfOoQ(yNr"),
-            array("name"=>"shine","password"=>'TkMfjwI)NCf$UN5)kxuSOa1b'),
-            array("name"=>"hellowo","password"=>"qO#rcv15I#xD5fHj(nHtj(1l"),
-            array("name"=>"peace","password"=>"7nWmvvvqGsl#CnL^opav&Ck2"),
-            array("name"=>"php","password"=>"EuwV!OVm%upmCEobPMBoTYIn"),
-            );
+        array("name"=>"bjmayor","password"=>"blog951096"),
+        array("name"=>"maynard","password"=>"wp123456"),
+        array("name"=>"fenny","password"=>"Nl!zceEiiBV!51GwzMYNdL6c"),
+        array("name"=>"stack","password"=>"Zfx0#0tX0cpIVotBfOoQ(yNr"),
+        array("name"=>"shine","password"=>'TkMfjwI)NCf$UN5)kxuSOa1b'),
+        array("name"=>"hellowo","password"=>"qO#rcv15I#xD5fHj(nHtj(1l"),
+        array("name"=>"peace","password"=>"7nWmvvvqGsl#CnL^opav&Ck2"),
+        array("name"=>"php","password"=>"EuwV!OVm%upmCEobPMBoTYIn"),
+    );
     $user = $users[rand()%count($users)];
     $username=$user['name'];
     $password=$user['password'];
@@ -167,14 +175,14 @@ function postWp($title, $content, $categories, $pubDate)
     $req->addParam ( new xmlrpcval ( $username, 'string' )); // 用户名 
     $req->addParam ( new xmlrpcval ( $password, 'string' )); // 密码 
     $struct = new xmlrpcval (
-            array ( "title" => new xmlrpcval ( $postTitle, 'string' ), // 标题 
-                "description" => new xmlrpcval ($postContent , 'string'), // 内容
-                "post_type"=>new xmlrpcval("post",'string'),
-                "post_status"=>new xmlrpcval("post",'string'),//publish为发布,draft为草稿
-                "dateCreated"=>new xmlrpcval(mt_rand(strtotime("2008-8-5 00:00:00"),strtotime("2016-08-29 12:00:00")),"dateTime.iso8601"),//发布时间，可不填，默认为当前时间。
-                "categories"=>new xmlrpcval(array(new xmlrpcval("linux学习","string")),"array")//分类信息,分类信息是需要已经存在的分类。
-                ),
-            "struct" );
+        array ( "title" => new xmlrpcval ( $postTitle, 'string' ), // 标题 
+        "description" => new xmlrpcval ($postContent , 'string'), // 内容
+        "post_type"=>new xmlrpcval("post",'string'),
+        "post_status"=>new xmlrpcval("post",'string'),//publish为发布,draft为草稿
+        "dateCreated"=>new xmlrpcval(strtotime($pubDate),"dateTime.iso8601"),//发布时间，可不填，默认为当前时间。
+        "categories"=>new xmlrpcval(array(new xmlrpcval($categories,"string")),"array")//分类信息,分类信息是需要已经存在的分类。
+    ),
+    "struct" );
     $req->addParam ( $struct ); 
     $req->addParam ( new xmlrpcval (1, 'int')); // 立即发布
     // 发送请求 

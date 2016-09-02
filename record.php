@@ -3,6 +3,7 @@ global $localdbpath;
 $localdbpath = "/home/work/php-readability/record.db";
 function recordUrl($url)
 {
+	echo "deal url: $url \n";
 	global $localdbpath;
     $db = new SQLite3($localdbpath);
     $result = $db->exec("insert into urlrecord(`url`,`datetime`) values('$url','".date('Y-m-d H:i:s',time())."')");

@@ -41,7 +41,8 @@ function main()
             {
                 $link = $matches[1][$i];
                 $title=$matches[2][$i];
-                $time = $matches[3][$i];
+                $time = $matches[3][$i];//时间只到日期，导致发布后，都变成8点。
+                $time = date("Y-m-d H:i:s",time());
                 $request_url = $link;
                 try {
                     if(!recordUrl($request_url))

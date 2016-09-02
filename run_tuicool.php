@@ -152,7 +152,7 @@ function get_content($request_url)
             //        $content = str_replace('src="../../','src="http://www.linuxidc.com/',$Data['content']);
             //       $content = substr($content, 0,-290); 
 
-            return array("title"=>$title,"content"=>$content."<p>更多文章请点击<a href='http://go2live.cn'>http://go2live.cn</a></p>");
+            return array("title"=>$title,"content"=>$content);
             //        include 'template/reader.html';
     }
 }

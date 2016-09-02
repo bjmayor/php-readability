@@ -47,7 +47,7 @@ function main()
             if($ret['title']!='' && $ret['content']!='')
             {
             //    var_dump($ret);
-            postWp($ret['title'],$ret['content'],"linux学习",date("Y-m-d H:i:s",mt_rand(strtotime("2008-8-5 00:00:00"),strtotime("2016-08-29 12:00:00"))));
+            postWp($ret['title'],$ret['content'],"linux学习",date("Y-m-d H:i:s",mt_rand(strtotime("2008-8-5 00:00:00"),time())));
             sleep(1);
             }
 

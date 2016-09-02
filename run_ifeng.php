@@ -22,7 +22,7 @@ if(preg_match_all('~<span>(.*)</span> </div>\s*<h2><a class="[^"]*" href="([^"]*
     $j=0;
     foreach($matches[0] as $item)
     {
-        $date = $matches[1][$j];
+        $date = date("Y-m-d H:i:s",strtotime($matches[1][$j]));//返回的时间没有秒，可能是这个原因导致有8小时的误差
         $link= $matches[2][$j];
         $j++;
         if(recordUrl($link))
@@ -131,7 +131,7 @@ function get_content($request_url)
         //        $content = str_replace('src="../../','src="http://www.linuxidc.com/',$Data['content']);
         //       $content = substr($content, 0,-290); 
 
-        return array("title"=>$title,"content"=>$content."<p>更多文章请点击<a href='http://go2live.cn'>http://go2live.cn</a></p>");
+        return array("title"=>$title,"content"=>$content);
         //        include 'template/reader.html';
     }
 }

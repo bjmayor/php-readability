@@ -16,13 +16,14 @@ require 'lib/plugin.php';
 require 'lib/xmlrpc.inc';
 
 $url = "http://go2live.cn/wp-admin/admin-ajax.php";
-for($i=20000;$i<60000;$i++)
+for($i=50000;$i<71400;$i++)
 {
     echo getPlugin($url,$i);
 }
 
 function getPlugin($url,$postid)
 {
+    echo "postid:$postid, \n";
 //    action=external_image_import_all_ajax&import_images_post=3616
     $data = array("action"=>"external_image_import_all_ajax","import_images_post"=>$postid);
     $post_str = http_build_query($data,"&");

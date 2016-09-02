@@ -41,7 +41,6 @@ foreach($ret['data'] as $item)
         $wpContent .= "<li><a href=\"$link\" target=\"_blank\">$title</a></li>";
     }
     $wpContent .="</ul>";
-    $wpContent .="<p>查看更多好文，请点击<a href=\"http://go2live.cn\">http://go2live.cn</a></p>";
     echo "do post url, topic $topicName \n";
     postWp($wpTitle,$wpContent,'杂文',date('Y-m-d H:i:s',time()));
 }

@@ -102,6 +102,7 @@ function get_content($request_url)
                 CURLOPT_HEADER  => false,
                 CURLOPT_HTTPGET => true,
                 CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_REFERER=>'http://www.woshipm.com/',
                 CURLOPT_TIMEOUT => 30,
                 CURLOPT_URL => $request_url
             ));

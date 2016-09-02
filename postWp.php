@@ -46,7 +46,7 @@ function postWp($title, $content, $categories, $pubDate)
         array ( "title" => new xmlrpcval ( $postTitle, 'string' ), // 标题 
         "description" => new xmlrpcval ($postContent , 'string'), // 内容
         "post_type"=>new xmlrpcval("post",'string'),
-        "post_status"=>new xmlrpcval("draft",'string'),//publish为发布,draft为草稿
+        "post_status"=>new xmlrpcval("publish",'string'),//publish为发布,draft为草稿
         "dateCreated"=>new xmlrpcval(strtotime($pubDate)-8*3600,"dateTime.iso8601"),//发布时间，可不填，默认为当前时间。
         "categories"=>new xmlrpcval(array(new xmlrpcval($categories,"string")),"array")//分类信息,分类信息是需要已经存在的分类。
     ),

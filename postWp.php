@@ -29,7 +29,6 @@ function postWp($title, $content, $categories, $pubDate)
     $user = $users[rand()%count($users)];
     $username=$user['name'];
     $password=$user['password'];
-
     $postTitle=$title;
     $postContent=$content."<p>转载自演道,想查看更及时的互联网产品技术热点文章请点击<a href=\"http://go2live.cn\">http://go2live.cn</a></p>";
 
@@ -47,8 +46,8 @@ function postWp($title, $content, $categories, $pubDate)
         array ( "title" => new xmlrpcval ( $postTitle, 'string' ), // 标题 
         "description" => new xmlrpcval ($postContent , 'string'), // 内容
         "post_type"=>new xmlrpcval("post",'string'),
-        "post_status"=>new xmlrpcval("post",'string'),//publish为发布,draft为草稿
-        "dateCreated"=>new xmlrpcval(strtotime($pubDate),"dateTime.iso8601"),//发布时间，可不填，默认为当前时间。
+        "post_status"=>new xmlrpcval("draft",'string'),//publish为发布,draft为草稿
+        "dateCreated"=>new xmlrpcval(strtotime($pubDate)-8*3600,"dateTime.iso8601"),//发布时间，可不填，默认为当前时间。
         "categories"=>new xmlrpcval(array(new xmlrpcval($categories,"string")),"array")//分类信息,分类信息是需要已经存在的分类。
     ),
     "struct" );
@@ -59,4 +58,5 @@ function postWp($title, $content, $categories, $pubDate)
     var_dump ( $ans );
 
 }
+
 

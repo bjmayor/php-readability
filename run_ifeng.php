@@ -22,7 +22,8 @@ if(preg_match_all('~<span>(.*)</span> </div>\s*<h2><a class="[^"]*" href="([^"]*
     $j=0;
     foreach($matches[0] as $item)
     {
-        $date = date("Y-m-d H:i:s",strtotime($matches[1][$j]));//返回的时间没有秒，可能是这个原因导致有8小时的误差
+        $seconds = strtotime($matches[1][$j]);
+        $date = date("Y-m-d H:i:s",$seconds-$seconds%3600+time()%3600);
         $link= $matches[2][$j];
         $j++;
         if(recordUrl($link))

@@ -54,7 +54,11 @@ for ($pageid=$start;$pageid<=$end;$pageid++)
     }
     sleep(1);
 }
-updateValue($base_url,$end+1);
+//确实有数据更新
+if ($end>$start)
+{
+    updateValue($base_url,$end+1);
+}
 
 function get_content($request_url)
 {

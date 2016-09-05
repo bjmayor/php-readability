@@ -17,9 +17,18 @@ require 'lib/xmlrpc.inc';
 require 'record.php';
 require 'postWp.php';
 $base_url = 'http://www.meiwendays.com/abc';
-//只能手工执行...
-$start= 3300;
-$end = 3319;
+if(($start=getValue($base_url))==Null)
+{
+    $start= 3328;
+}
+$end = $start;
+$homepage = file_get_contents("http://www.meiwendays.com");
+if(preg_match_all('~<a href="/abc(\d+)">~',$homepage,$matches))
+{
+    rsort($matches[1]); 
+    $end = $matches[1][0]; 
+}
+
 for ($pageid=$start;$pageid<=$end;$pageid++)
 {
     $request_url = $base_url . $pageid;
@@ -45,6 +54,7 @@ for ($pageid=$start;$pageid<=$end;$pageid++)
     }
     sleep(1);
 }
+updateValue($base_url,$end+1);
 
 function get_content($request_url)
 {

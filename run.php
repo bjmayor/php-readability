@@ -39,7 +39,7 @@ for ($pageid=$start;$pageid<=$end;$pageid++)
         {
             if(recordUrl($request_url))
             {
-                postWp($ret['title'],$ret['content'],'美文赏析',date('Y-m-d H:i:s',time()));
+                postWp($ret['title'],$ret['content'],'心灵小憩',date('Y-m-d H:i:s',time()));
             }
             else
             {

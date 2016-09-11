@@ -42,7 +42,7 @@ function main()
                     if($ret['title']!='' && $ret['content']!='')
                     {
                         $ret['content'].="<p>互联网产品技术观点文章尽在演道网，点击查看<a href=\"http://go2live.cn\">http://go2live.cn</a></p>";
-                        postWp($ret['title'],$ret['content'],"互联网产品设计",$time);
+                        postWp($ret['title'],$ret['content'],"产品",$time);
                         sleep(1);
                     }
 

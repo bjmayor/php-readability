@@ -54,7 +54,18 @@ function main()
                     $ret['title'] = $title;
                     if($ret['title']!='' && $ret['content']!='')
                     {
-                        postWp($ret['title'],$ret['content'],"互联网产品设计",$time);
+                        $ret['content'] = preg_replace('/<img[^>]+data-original=[\'"]?([^>\'" ]+)[\'"]?\s*src=[\'"]?[^>\'" ][\'"]?+.*>/',"<img src='$1' />",$ret['content']);
+                        $ret['content'] = str_replace('<div>没人带，自学慢，不在BAT怎么学产品？人人都是产品经理联合200+BAT资深产品经理带你学<a target="_blank" href="http://www.qidianla.com/topic/member.html?channel=top"> 点此查看详情</a></div>',"",$ret['content']);
+                        $category = "互联网产品设计";
+                        if(strpos($request_url,"/pmd/")!==false)
+                        {$category = "产品";}
+                        if(strpos($request_url,"/pd/")!==false)
+                        {$category = "设计";}
+                        else  if(strpos($request_url,"/operate/")!==false)
+                        {$category = "运营推广";}
+                        else  if(strpos($request_url,"/zhichang/")!==false)
+                        {$category = "互联网职场软技能";}
+                        postWp($ret['title'],$ret['content'],$category,$time);
                         sleep(1);
                     }
 

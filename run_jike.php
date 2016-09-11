@@ -24,7 +24,7 @@ foreach($ret['data'] as $item)
     $topicName = $item['content'];
     $topicLastPostTime = $item['lastMessagePostTime'];
     $topicPic = $item['pictureUrl'];
-    $wpTitle = $topicName."【".date("Y-m-d",time())."汇总】";
+    $wpTitle = $topicName."【".date("Y-m-d",time())."汇总】".date('H点',time())."发布";
     $wpContent = "<img src=\"$topicPic\" />";
     $wpContent .= "<ul>";
     //判断更新时间是否大于当天0点,以及条数是否够20。
@@ -42,7 +42,7 @@ foreach($ret['data'] as $item)
     }
     $wpContent .="</ul>";
     echo "do post url, topic $topicName \n";
-    postWp($wpTitle,$wpContent,'杂文',date('Y-m-d H:i:s',time()));
+    postWp($wpTitle,$wpContent,'互联网最新资讯订阅',date('Y-m-d H:i:s',time()));
 }
 
     /*

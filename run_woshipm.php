@@ -36,13 +36,13 @@ function main()
     {
         $listpage = "http://www.woshipm.com/page/$page?nocache";
         $listcontent = file_get_contents($listpage);
-        if(preg_match_all('~<h3 class="list-h3"><a target="_blank" href="([^"]*)" title="[^"]*">([^<]*)</a></h3>\s*</div>\s*<div class="down-box">\s*<li class="time">([^<]*)</li>~',$listcontent,$matches)){
+        if(preg_match_all('~<h2 class="stream-list-title"><a target="_blank" href="([^"]*)" title="([^"]*)".*?<time datetime="([^"]*)">[^<]*</time>~s',$listcontent,$matches)){
             for($i=0;$i<count($matches);$i++)
             {
                 $link = $matches[1][$i];
                 $title=$matches[2][$i];
                 $time = $matches[3][$i];//时间只到日期，导致发布后，都变成8点。
-                $time = date("Y-m-d H:i:s",time());
+                $time = date("Y-m-d H:i:s",strtotime($time)-3600*8);
                 $request_url = $link;
                 try {
                     if(!recordUrl($request_url))
@@ -77,6 +77,10 @@ function main()
 
 
             }
+        }
+        else
+        {
+            echo "list page no match\n";
         }
     }
 }

@@ -16,50 +16,58 @@ require 'lib/plugin.php';
 require 'lib/xmlrpc.inc';
 require 'record.php';
 require 'postWp.php';
-
-main();
-function main()
-{
-    $max = 1;
-    for($page=$max;$page>0;$page--)
+$listpage= "https://www.huxiu.com/startups.html";
+$listcontent = file_get_contents($listpage);
+if(preg_match_all('~<div class="mob-ctt">\s*<h2><a href="([^"]*)" class="transition" target="_blank">([^<]*)</a></h2>~',$listcontent,$matches)) {
+    $j=0;
+    foreach($matches[0] as $item)
     {
-        $listpage = "http://zaodula.com/page/$page";
-        $listcontent = file_get_contents($listpage);
-        if(preg_match_all('~<div class="post postthumb">\s*<h2><a href="([^"]*)" title="[^"]*">([^<]*)</a></h2>\s*<div class="pmeta">\s*日期:([0-9:\-]*)~s',$listcontent,$matches)){
-            for($i=0;$i<count($matches);$i++)
-            {
-                $link = $matches[1][$i];
-                $title = $matches[2][$i];
-                $time = $matches[3][$i];
-                $request_url = $link;
-                try {
-                    if(!recordUrl($request_url))
-                    {
-                        continue;
-                    }
-                    $ret = get_content($request_url);
-                    $ret['title'] = $title;
-                    if($ret['title']!='' && $ret['content']!='')
-                    {
-                        $ret['content'].="<p>互联网产品技术观点文章尽在演道网，点击查看<a href=\"http://go2live.cn\">http://go2live.cn</a></p>";
-                        postWp($ret['title'],$ret['content'],"产品",$time);
-                        sleep(1);
-                    }
-
-                }
-                catch(Exception $e)
-                {
-                    echo "parse error";
-                }
-            }
+        $date = date("Y-m-d H:i:s");
+        $link= "https://www.huxiu.com".$matches[1][$j];
+        $j++;
+        //if(recordUrl($link))
+        if(true)
+        {
+            do_spider_to_wp($link,$date);
         }
         else
         {
-            echo "list page no match\n";
+            echo "duplicated url\n";
         }
     }
 }
-//}
+else
+{
+    echo "list no match\n";
+    break;
+}
+
+
+die("done");
+function do_spider_to_wp($url,$date)
+{
+    echo "do post url $url \n";
+    $request_url = $url;
+    try {
+        $ret = get_content($request_url);
+        if(preg_match('~<p label="大标题">(.*?)</p>(.*?)<span>~sm',$ret['content'],$matches))
+        {
+            $ret['title'] = $matches[1];
+            $ret['content'] = $matches[2];
+        }
+        if($ret['title']!='' && $ret['content']!='')
+        {
+            postWp($ret['title'],$ret['content'],"互联网观点热点",$date);
+            sleep(1);
+        }
+
+    }
+    catch(Exception $e)
+    {
+        echo "parse error";
+    }
+
+}
 
 
 function get_content($request_url)
@@ -69,7 +77,7 @@ function get_content($request_url)
     $output_type = strtolower(getRequestParam("type", "html"));
 
     // 如果 URL 参数不正确，则跳转到首页
-    if (!preg_match('/^http:\/\//i', $request_url) ||
+    if (!preg_match('/^https??:\/\//i', $request_url) ||
         !filter_var($request_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
             include 'template/index.html';
             exit;
@@ -124,13 +132,14 @@ function get_content($request_url)
     case 'html': default:
         //header("Content-type: text/html;charset=utf-8");
         $title   = $Data['title'];
-        $title = substr($title,0,strpos($title,"_Linux编程_Linux公社-Linux系统门户网站"));
-        $content = str_replace('src="../../','src="http://www.linuxidc.com/',$Data['content']);
-        $content = substr($content, 0,-290); 
+        $content = $Data['content'];
+        $title = substr($title,0,strpos($title,"_凤凰科技"));
+        //        $content = str_replace('src="../../','src="http://www.linuxidc.com/',$Data['content']);
+        //       $content = substr($content, 0,-290); 
 
-        return array("title"=>$title,"content"=>$content."</div>");
+        return array("title"=>$title,"content"=>$content);
         //        include 'template/reader.html';
     }
 }
 
-
+?>

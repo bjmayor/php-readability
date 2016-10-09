@@ -24,10 +24,11 @@ if(preg_match_all('~<div class="mob-ctt">\s*<h2><a href="([^"]*)" class="transit
     {
         $date = date("Y-m-d H:i:s");
         $link= "https://www.huxiu.com".$matches[1][$j];
+        $title = $matches[2][$j];
         $j++;
         if(recordUrl($link))
         {
-            do_spider_to_wp($link,$date);
+            do_spider_to_wp($link,$title,$date);
         }
         else
         {
@@ -42,7 +43,7 @@ else
 
 
 die("done");
-function do_spider_to_wp($url,$date)
+function do_spider_to_wp($url,$title,$date)
 {
     echo "do post url $url \n";
     $request_url = $url;
@@ -53,6 +54,7 @@ function do_spider_to_wp($url,$date)
             $ret['title'] = $matches[1];
             $ret['content'] = $matches[2];
         }
+        $ret['title'] = $title;
         if($ret['title']!='' && $ret['content']!='')
         {
             postWp($ret['title'],$ret['content'],"互联网观点热点",$date);

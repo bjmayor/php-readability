@@ -25,8 +25,7 @@ if(preg_match_all('~<div class="mob-ctt">\s*<h2><a href="([^"]*)" class="transit
         $date = date("Y-m-d H:i:s");
         $link= "https://www.huxiu.com".$matches[1][$j];
         $j++;
-        //if(recordUrl($link))
-        if(true)
+        if(recordUrl($link))
         {
             do_spider_to_wp($link,$date);
         }
@@ -39,7 +38,6 @@ if(preg_match_all('~<div class="mob-ctt">\s*<h2><a href="([^"]*)" class="transit
 else
 {
     echo "list no match\n";
-    break;
 }
 
 

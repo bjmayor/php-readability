@@ -41,7 +41,8 @@ function main()
                     $ret['title'] = $title;
                     if($ret['title']!='' && $ret['content']!='')
                     {
-                        $ret['content'].="<p>互联网产品技术观点文章尽在演道网，点击查看<a href=\"http://go2live.cn\">http://go2live.cn</a></p>";
+                        $ret['content'] = preg_replace('~<p><span>作者：.*?请修改群名片。</p>~sm',"",$ret['content']);
+                        $ret['content'] = preg_replace('~<span>作者：.*?请修改群名片。</p>~sm',"",$ret['content']);
                         postWp($ret['title'],$ret['content'],"产品",$time);
                         sleep(1);
                     }
@@ -52,10 +53,6 @@ function main()
                     echo "parse error";
                 }
             }
-        }
-        else
-        {
-            echo "list page no match\n";
         }
     }
 }
@@ -124,11 +121,9 @@ function get_content($request_url)
     case 'html': default:
         //header("Content-type: text/html;charset=utf-8");
         $title   = $Data['title'];
-        $title = substr($title,0,strpos($title,"_Linux编程_Linux公社-Linux系统门户网站"));
-        $content = str_replace('src="../../','src="http://www.linuxidc.com/',$Data['content']);
-        $content = substr($content, 0,-290); 
+        $content = $Data['content'];
 
-        return array("title"=>$title,"content"=>$content."</div>");
+        return array("title"=>$title,"content"=>$content);
         //        include 'template/reader.html';
     }
 }

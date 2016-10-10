@@ -139,11 +139,9 @@ function get_content($request_url)
     case 'html': default:
         //header("Content-type: text/html;charset=utf-8");
         $title   = $Data['title'];
-        $title = substr($title,0,strpos($title,"_Linux编程_Linux公社-Linux系统门户网站"));
-        $content = str_replace('src="../../','src="http://www.linuxidc.com/',$Data['content']);
-        $content = substr($content, 0,-290); 
+        $content = $Data['content'];
 
-        return array("title"=>$title,"content"=>$content."</div>");
+        return array("title"=>$title,"content"=>$content);
         //        include 'template/reader.html';
     }
 }

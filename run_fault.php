@@ -42,12 +42,10 @@ function main()
             $request_url = getRealUrl($link);
 
             try {
-                /*
                 if(!recordUrl($request_url))
                 {
                     continue;
                 }
-                 */
                 $ret = get_content($request_url);
                 $ret['title'] = $title;
                 if($ret['title']!='' && $ret['content']!='')

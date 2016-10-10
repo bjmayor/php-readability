@@ -41,20 +41,21 @@ function main()
             {
                 $link = $matches[1][$i];
                 $title=$matches[2][$i];
-                $time = $matches[3][$i];//时间只到日期，导致发布后，都变成8点。
-                $time = date("Y-m-d H:i:s",strtotime($time)-3600*8);
+                $time = strtotime($matches[3][$i])-3600*8;//时间只到日期，导致发布后，都变成8点。
+                $day_second = 3600*24;
+                $time = date("Y-m-d H:i:s",$time-$time%$day_second+time()%$day_second);
                 $request_url = $link;
                 try {
                     if(!recordUrl($request_url))
                     {
                         continue;
                     }
-
                     $ret = get_content($request_url);
                     $ret['title'] = $title;
                     if($ret['title']!='' && $ret['content']!='')
                     {
                         $ret['content'] = preg_replace('/<img[^>]+data-original=[\'"]?([^>\'" ]+)[\'"]?\s*src=[\'"]?[^>\'" ][\'"]?+.*>/',"<img src='$1' />",$ret['content']);
+                        $ret['content'] = preg_replace('~本文由.*?原创发布于人人都是产品经理。未经许可，禁止转载。~','',$ret['content']);
                         $ret['content'] = str_replace('<div>没人带，自学慢，不在BAT怎么学产品？人人都是产品经理联合200+BAT资深产品经理带你学<a target="_blank" href="http://www.qidianla.com/topic/member.html?channel=top"> 点此查看详情</a></div>',"",$ret['content']);
                         $category = "互联网产品设计";
                         if(strpos($request_url,"/pmd/")!==false)
@@ -150,11 +151,8 @@ function get_content($request_url)
     case 'html': default:
         //header("Content-type: text/html;charset=utf-8");
         $title   = $Data['title'];
-        $title = substr($title,0,strpos($title,"_Linux编程_Linux公社-Linux系统门户网站"));
-        $content = str_replace('src="../../','src="http://www.linuxidc.com/',$Data['content']);
-        $content = substr($content, 0,-290); 
-
-        return array("title"=>$title,"content"=>$content."</div>");
+        $content = $Data['content'];
+        return array("title"=>$title,"content"=>$content);
         //        include 'template/reader.html';
     }
 }

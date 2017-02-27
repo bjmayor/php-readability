@@ -18,7 +18,6 @@ require 'record.php';
 require 'postWp.php';
 $listpage= "https://www.huxiu.com/startups.html";
 $listcontent = file_get_contents($listpage);
-echo $listcontent;
 if(preg_match_all('~<div class="mob-ctt">\s*<h2>\s*<a href="([^"]*)" class="transition msubstr-row2" target="_blank">([^<]*)</a>\s*</h2>~',$listcontent,$matches)) {
     $j=0;
     foreach($matches[0] as $item)
@@ -47,7 +46,6 @@ die("done");
 function do_spider_to_wp($url,$title,$date)
 {
     echo "do post url $url \n";
-    return;
     $request_url = $url;
     try {
         $ret = get_content($request_url);

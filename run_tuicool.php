@@ -24,12 +24,12 @@ echo $listcontent;
     if(preg_match('~<li class="next">\s*<a href="([^*]*)">下一页</a>~',$listcontent,$matches))
     {
         $listpage = "http://www.tuicool.com".$matches[1];
-        if(preg_match_all('~<a href="([^"]*)" class="article-list-title" target="_blank" title="[^"]*">([^<]*)</a>~',$listcontent,$matches))
+        if(preg_match_all('~<a href="/articles/([^"]*)" target="_blank" title="[^"]*">([^<]*)</a>~',$listcontent,$matches))
         {
             $j=0;
             foreach($matches[0] as $item)
             {
-                $link = "http://www.tuicool.com/".$matches[1][$j];
+                $link = "http://www.tuicool.com/articles/".$matches[1][$j];
                 $title= $matches[2][$j];
                 $j++;
                 do_spider_to_wp($link,"",$title);
